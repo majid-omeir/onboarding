@@ -50,7 +50,7 @@ jobs:
     - name: Test worker
       run: |
         cd packages/worker
-        npm run test || echo "Test script not configured yet"
+        npm run test:run
     
     - name: Type check worker
       run: |

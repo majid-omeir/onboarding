@@ -6,11 +6,15 @@ import FeatureTour from './pages/FeatureTour';
 import Signature from './pages/Signature';
 import Feedback from './pages/Feedback';
 import Welcome from './pages/Welcome';
+import SignIn from './pages/SignIn';
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Sign In (without layout) */}
+        <Route path="/signin" element={<SignIn />} />
+        
         {/* Onboarding Flow with Layout */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/account" replace />} />

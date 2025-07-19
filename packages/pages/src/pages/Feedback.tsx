@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiService } from '../utils/api';
 import type { FeedbackData } from '../types';
 
 const Feedback: React.FC = () => {
@@ -9,6 +10,8 @@ const Feedback: React.FC = () => {
   const [preferences, setPreferences] = useState<string[]>([]);
   const [showSkipButton, setShowSkipButton] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
 
   const preferenceOptions = [
     { id: 'easy-setup', label: 'Easy setup' },
@@ -20,7 +23,6 @@ const Feedback: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Show skip button after 10 seconds
     const timer = setTimeout(() => {
       setShowSkipButton(true);
     }, 10000);
@@ -42,90 +44,58 @@ const Feedback: React.FC = () => {
 
   const handleSubmit = async () => {
     if (rating === 0) return;
-
+  
     setIsSubmitting(true);
-
+    setError(null);
+  
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       const feedbackData: FeedbackData = {
         rating,
         comment: comment.trim() || undefined,
         preferences,
         timestamp: new Date().toISOString()
       };
-
-      // Update saved data
-      const existingData = localStorage.getItem('onboarding-data');
-      const savedData = existingData ? JSON.parse(existingData) : {};
-
-      localStorage.setItem('onboarding-data', JSON.stringify({
-        ...savedData,
-        step: 5,
-        feedbackData,
-        onboardingCompleted: true,
-        completedAt: new Date().toISOString()
-      }));
-
-      // Navigate to success page or dashboard
-      navigate('/welcome');
+  
+      const response = await apiService.saveFeedback({
+        score: feedbackData.rating,
+        comment: feedbackData.comment,
+        preferences: feedbackData.preferences
+      });
+  
+      if (response.success) {
+        await apiService.saveStep({
+            stepId: 'feedback',
+            data: feedbackData
+        });
+        navigate('/welcome');
+      } else {
+        setError(response.error || 'An unexpected error occurred while submitting feedback.');
+      }
     } catch (error) {
       console.error('Error submitting feedback:', error);
+      setError('Failed to submit feedback. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleRemindLater = async () => {
+  const handleNagivateToWelcome = async () => {
     setIsSubmitting(true);
-
+    // Even if skipping, we can mark the onboarding as complete
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Save reminder preference
-      const existingData = localStorage.getItem('onboarding-data');
-      const savedData = existingData ? JSON.parse(existingData) : {};
-
-      localStorage.setItem('onboarding-data', JSON.stringify({
-        ...savedData,
-        step: 5,
-        feedbackReminder: true,
-        onboardingCompleted: true,
-        completedAt: new Date().toISOString()
-      }));
-
-      navigate('/welcome');
+        await apiService.saveStep({
+            stepId: 'onboarding_completed',
+            data: {
+                skipped_feedback: true,
+                completedAt: new Date().toISOString()
+            }
+        });
     } catch (error) {
-      console.error('Error setting reminder:', error);
+        console.error('Failed to save final step:', error)
     } finally {
-      setIsSubmitting(false);
+        navigate('/welcome');
     }
-  };
 
-  const handleSkip = async () => {
-    setIsSubmitting(true);
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Save skip preference
-      const existingData = localStorage.getItem('onboarding-data');
-      const savedData = existingData ? JSON.parse(existingData) : {};
-
-      localStorage.setItem('onboarding-data', JSON.stringify({
-        ...savedData,
-        step: 5,
-        feedbackSkipped: true,
-        onboardingCompleted: true,
-        completedAt: new Date().toISOString()
-      }));
-
-      navigate('/welcome');
-    } catch (error) {
-      console.error('Error skipping feedback:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -135,8 +105,8 @@ const Feedback: React.FC = () => {
       <div className="relative z-50 bg-white rounded-lg shadow-xl max-w-md w-full p-8 mx-4">
         {/* Success Icon */}
         <div className="text-center mb-6">
-          <div className="mx-auto w-16 h-16 bg-success-100 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-success-600" fill="currentColor" viewBox="0 0 20 20">
+          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
           </div>
@@ -147,6 +117,12 @@ const Feedback: React.FC = () => {
             How was your onboarding experience?
           </p>
         </div>
+
+        {error && (
+            <div className="mb-4 p-4 bg-red-100 text-red-700 border border-red-200 rounded-md">
+                {error}
+            </div>
+        )}
 
         {/* Rating */}
         <div className="mb-6">
@@ -187,7 +163,7 @@ const Feedback: React.FC = () => {
             placeholder="What did you like most? Any suggestions for improvement?"
             rows={3}
             maxLength={250}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm resize-none"
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
           />
           <div className="flex justify-between mt-1">
             <span className="text-xs text-gray-500">
@@ -211,7 +187,7 @@ const Feedback: React.FC = () => {
                 onClick={() => handlePreferenceToggle(option.id)}
                 className={`text-sm px-3 py-2 rounded border transition-colors ${
                   preferences.includes(option.id)
-                    ? 'bg-primary-50 border-primary-200 text-primary-700'
+                    ? 'bg-blue-50 border-blue-200 text-blue-700'
                     : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -231,7 +207,7 @@ const Feedback: React.FC = () => {
             disabled={rating === 0 || isSubmitting}
             className={`w-full py-3 px-4 rounded-md font-medium transition-colors ${
               rating > 0 && !isSubmitting
-                ? 'bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
+                ? 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
@@ -249,29 +225,21 @@ const Feedback: React.FC = () => {
           </button>
 
           <button
-            onClick={handleRemindLater}
-            disabled={isSubmitting}
-            className="w-full py-2 px-4 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            onClick={handleNagivateToWelcome}
+            className="w-full text-center text-sm text-gray-600 hover:text-gray-800 underline"
           >
-            Remind me later (24 hours)
+            Remind me later
           </button>
-
+          
           {showSkipButton && (
             <button
-              onClick={handleSkip}
-              disabled={isSubmitting}
-              className="w-full py-2 px-4 text-sm text-gray-500 hover:text-gray-700 underline transition-colors"
+              onClick={handleNagivateToWelcome}
+              className="w-full text-center text-sm text-gray-500 hover:text-gray-700"
             >
-              Skip feedback
+              Skip for now
             </button>
           )}
         </div>
-
-        {!showSkipButton && (
-          <p className="text-center text-xs text-gray-500 mt-4">
-            Skip option available in {Math.max(0, 10 - Math.floor((Date.now() % 10000) / 1000))} seconds
-          </p>
-        )}
       </div>
     </div>
   );

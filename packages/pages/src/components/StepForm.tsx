@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { StepFormProps } from '../types';
+import { apiService } from '../utils/api';
 
 const StepForm: React.FC<StepFormProps> = ({
-  stepId: _stepId,
+  stepId,
   title,
   description,
   children,
@@ -12,22 +14,35 @@ const StepForm: React.FC<StepFormProps> = ({
   isSubmitting = false,
   autoSave = true
 }) => {
+  const navigate = useNavigate();
+
+  const handleSaveAndContinueLater = async () => {
+    try {
+      // Clear the current token to force sign-in next time
+      apiService.logout();
+      
+      // Navigate to sign-in page with a message
+      navigate('/signin?saved=true');
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
+  };
   return (
     <div className="max-w-2xl mx-auto">
       {/* Step Header */}
       <div className="text-center mb-8">
-        <h1 className="text-h1 text-gray-900 mb-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
           {title}
         </h1>
         {description && (
-          <p className="text-body-lg text-gray-600">
+          <p className="text-lg text-gray-600">
             {description}
           </p>
         )}
       </div>
 
       {/* Form Content */}
-      <div className="bg-white rounded-card shadow-card p-6 lg:p-8 mb-8">
+      <div className="bg-white rounded-lg shadow-md p-6 lg:p-8 mb-8">
         {children}
       </div>
 
@@ -37,7 +52,7 @@ const StepForm: React.FC<StepFormProps> = ({
           <button
             type="button"
             onClick={onPrevious}
-            className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-component text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+            className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -53,7 +68,7 @@ const StepForm: React.FC<StepFormProps> = ({
           {autoSave && (
             <div className="text-sm text-gray-500">
               <span className="inline-flex items-center">
-                <svg className="w-4 h-4 mr-1 text-success-500" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
                 Saved
@@ -66,9 +81,9 @@ const StepForm: React.FC<StepFormProps> = ({
             onClick={onNext}
             disabled={!isValid || isSubmitting}
             className={`
-              inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-component text-white transition-all
+              inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white transition-all
               ${isValid && !isSubmitting
-                ? 'bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-button hover:shadow-lg transform hover:scale-105'
+                ? 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm hover:shadow-md transform hover:scale-105'
                 : 'bg-gray-300 cursor-not-allowed'
               }
             `}
@@ -97,6 +112,7 @@ const StepForm: React.FC<StepFormProps> = ({
       <div className="text-center mt-6">
         <button
           type="button"
+          onClick={handleSaveAndContinueLater}
           className="text-sm text-gray-500 hover:text-gray-700 underline"
         >
           Save and continue later

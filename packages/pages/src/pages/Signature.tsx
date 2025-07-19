@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StepForm from '../components/StepForm';
+import { apiService } from '../utils/api';
 import type { SignatureData } from '../types';
 
 const Signature: React.FC = () => {
@@ -95,30 +96,32 @@ const Signature: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       const signatureData: SignatureData = {
         legalName: legalName.trim(),
         timestamp: new Date().toISOString(),
         termsScrolled,
         agreedToTerms,
-        ipAddress: '127.0.0.1' // Would be actual IP in production
+        ipAddress: '127.0.0.1' // In a real app, this would be captured on the backend
       };
       
-      // Update saved data
-      const existingData = localStorage.getItem('onboarding-data');
-      const savedData = existingData ? JSON.parse(existingData) : {};
-      
-      localStorage.setItem('onboarding-data', JSON.stringify({
-        ...savedData,
-        step: 4,
-        signatureData,
-        completedAt: new Date().toISOString()
-      }));
-      
-      navigate('/feedback');
+      const response = await apiService.saveSignature({
+        name: signatureData.legalName,
+        timestamp: signatureData.timestamp,
+      });
+
+      if (response.success) {
+        await apiService.saveStep({
+            stepId: 'signature',
+            data: signatureData
+        });
+        navigate('/feedback');
+      } else {
+        setErrors({ api: response.error || 'An unexpected error occurred.' });
+      }
+
     } catch (error) {
       console.error('Error saving signature:', error);
+      setErrors({ api: 'Failed to save signature. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -138,6 +141,11 @@ const Signature: React.FC = () => {
       isValid={Boolean(isValid)}
       isSubmitting={isSubmitting}
     >
+        {errors.api && (
+            <div className="mb-4 p-4 bg-red-100 text-red-700 border border-red-200 rounded-md">
+                {errors.api}
+            </div>
+        )}
       {/* Terms of Service */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Terms of Service</h3>
@@ -160,7 +168,7 @@ const Signature: React.FC = () => {
         )}
         
         {termsScrolled && (
-          <p className="mt-2 text-sm text-success-600 flex items-center">
+          <p className="mt-2 text-sm text-green-600 flex items-center">
             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
@@ -169,7 +177,7 @@ const Signature: React.FC = () => {
         )}
         
         {errors.terms && (
-          <p className="mt-2 text-sm text-error-600">{errors.terms}</p>
+          <p className="mt-2 text-sm text-red-600">{errors.terms}</p>
         )}
       </div>
 
@@ -179,7 +187,7 @@ const Signature: React.FC = () => {
         <div className="flex space-x-4">
           <a 
             href="#" 
-            className="inline-flex items-center text-primary-600 hover:text-primary-500 text-sm"
+            className="inline-flex items-center text-blue-600 hover:text-blue-500 text-sm"
           >
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -188,7 +196,7 @@ const Signature: React.FC = () => {
           </a>
           <a 
             href="#" 
-            className="inline-flex items-center text-primary-600 hover:text-primary-500 text-sm"
+            className="inline-flex items-center text-blue-600 hover:text-blue-500 text-sm"
           >
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -213,18 +221,18 @@ const Signature: React.FC = () => {
             onChange={(e) => setLegalName(e.target.value)}
             placeholder="Type your full legal name"
             className={`
-              block w-full px-3 py-3 text-base border rounded-component
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
+              block w-full px-3 py-3 text-base border rounded-md
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
               transition-colors duration-200
               ${errors.legalName 
-                ? 'border-error-500 focus:border-error-500 focus:ring-error-500' 
-                : 'border-gray-300 focus:border-primary-500'
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:border-blue-500'
               }
             `}
             autoComplete="name"
           />
           {errors.legalName && (
-            <p className="mt-2 text-sm text-error-600">{errors.legalName}</p>
+            <p className="mt-2 text-sm text-red-600">{errors.legalName}</p>
           )}
           <p className="mt-2 text-sm text-gray-500">
             Type your full legal name as it appears on official documents
@@ -239,7 +247,7 @@ const Signature: React.FC = () => {
                 type="checkbox"
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
               />
             </div>
             <div className="ml-3">
@@ -248,30 +256,8 @@ const Signature: React.FC = () => {
                 I understand that this constitutes a legally binding electronic signature.
               </label>
               {errors.agreement && (
-                <p className="mt-1 text-sm text-error-600">{errors.agreement}</p>
+                <p className="mt-2 text-sm text-red-600">{errors.agreement}</p>
               )}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
-          <div className="flex items-start">
-            <svg className="w-5 h-5 text-gray-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <div>
-              <p className="font-medium text-gray-700 mb-1">🔒 Legally Binding Signature</p>
-              <p>
-                By typing your name and checking the agreement box, you are creating a legally binding electronic signature. 
-                This signature will be recorded with a timestamp and IP address for security purposes.
-              </p>
-              <p className="mt-2">
-                <strong>Date:</strong> {new Date().toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </p>
             </div>
           </div>
         </div>

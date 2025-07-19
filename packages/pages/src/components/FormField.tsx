@@ -17,12 +17,12 @@ const FormField: React.FC<FormFieldProps> = ({
   const fieldId = `field-${label.toLowerCase().replace(/\s+/g, '-')}`;
   
   const baseInputStyles = `
-    block w-full px-3 py-3 text-base border rounded-component
-    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
+    block w-full px-3 py-3 text-base border rounded-md
+    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
     transition-colors duration-200
     ${error 
-      ? 'border-error-500 focus:border-error-500 focus:ring-error-500' 
-      : 'border-gray-300 focus:border-primary-500'
+      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+      : 'border-gray-300 focus:border-blue-500'
     }
     ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
   `;
@@ -82,13 +82,13 @@ const FormField: React.FC<FormFieldProps> = ({
     <div className="mb-6">
       <label htmlFor={fieldId} className="block text-sm font-medium text-gray-700 mb-2">
         {label}
-        {required && <span className="text-error-500 ml-1">*</span>}
+        {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       
       {renderInput()}
       
       {error && (
-        <p id={`${fieldId}-error`} className="mt-2 text-sm text-error-600" role="alert">
+        <p id={`${fieldId}-error`} className="mt-2 text-sm text-red-600" role="alert">
           {error}
         </p>
       )}

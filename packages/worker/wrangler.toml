@@ -4,12 +4,8 @@ compatibility_date = "2024-11-21"
 
 [vars]
 ENVIRONMENT = "development"
+JWT_SECRET = "development-secret-key-change-in-production"
 
 [[kv_namespaces]]
 binding = "ONBOARDING_KV"
-id = "placeholder"
-preview_id = "placeholder"
-
-[[durable_objects.bindings]]
-name = "USER_SESSION"
-class_name = "UserSession"
+id = "d3a7f6980ac440a08f9bf75bb5542c0d"

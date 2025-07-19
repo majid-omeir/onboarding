@@ -24,9 +24,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     
     switch (status) {
       case 'completed':
-        return `${baseStyles} bg-success-500 text-white`;
+        return `${baseStyles} bg-green-500 text-white`;
       case 'current':
-        return `${baseStyles} bg-primary-500 text-white ring-4 ring-primary-100`;
+        return `${baseStyles} bg-blue-600 text-white ring-4 ring-blue-100`;
       case 'upcoming':
         return `${baseStyles} bg-gray-200 text-gray-600`;
       default:
@@ -63,7 +63,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           {/* Progress Line */}
           <div className="absolute top-4 left-4 right-4 h-1 bg-gray-200 rounded-full">
             <div 
-              className="h-full bg-primary-500 rounded-full transition-all duration-300 ease-out"
+              className="h-full bg-blue-600 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -81,7 +81,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                     ? 'cursor-pointer hover:scale-110' 
                     : 'cursor-default'
                   }
-                  focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                 `}
                 aria-label={`Step ${stepNumber}`}
               >
@@ -99,7 +99,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               >
                 <span className={`
                   text-sm font-medium
-                  ${getStepStatus(index + 1) === 'current' ? 'text-primary-600' : 'text-gray-600'}
+                  ${getStepStatus(index + 1) === 'current' ? 'text-blue-600' : 'text-gray-600'}
                 `}>
                   {label}
                 </span>
@@ -122,7 +122,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
-            className="bg-primary-500 h-2 rounded-full transition-all duration-300 ease-out"
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />
         </div>
