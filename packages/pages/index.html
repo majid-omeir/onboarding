@@ -4,10 +4,291 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>CloudflareFlow - Onboarding</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Enhanced fallback styles */
+      .loading-spinner {
+        border: 4px solid #f3f4f6;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      
+      .btn-primary:hover {
+        background-color: #2563eb;
+      }
+      
+      .btn-primary:disabled {
+        background-color: #9ca3af;
+        cursor: not-allowed;
+      }
+      
+      .input-field {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+      }
+      
+      .input-field:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+      }
+      
+      .success-message {
+        color: #10b981;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+      }
+    </style>
   </head>
-  <body>
-    <div id="root"></div>
+  <body class="bg-gray-50 min-h-screen">
+    <div id="root">
+      <div class="max-w-4xl mx-auto py-8 px-4">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 mb-4">🌐 CloudflareFlow</h1>
+          <div class="loading-spinner"></div>
+          <p class="text-gray-600 mt-4">Loading onboarding application...</p>
+        </div>
+      </div>
+    </div>
+    
     <script type="module" src="/src/main.tsx"></script>
+    
+    <script>
+      let appLoaded = false;
+      
+      // Test API connectivity
+      async function testAPI() {
+        try {
+          const response = await fetch('https://onboarding-worker.momeir.workers.dev/api/health');
+          const data = await response.json();
+          return data.success;
+        } catch (error) {
+          console.error('API test failed:', error);
+          return false;
+        }
+      }
+      
+      // Handle Sign In functionality with proper navigation
+      function setupSignInHandling() {
+        console.log('🔧 Setting up sign-in handling...');
+        
+        // Function to handle sign-in clicks
+        function handleSignInClick(e) {
+          e.preventDefault();
+          console.log('🔑 Sign in clicked - navigating to /signin');
+          window.location.href = '/signin';
+        }
+        
+        // Set up sign-in handlers multiple times to catch dynamically loaded content
+        function attachSignInHandlers() {
+          const signInLinks = document.querySelectorAll('a[href="#"], #signin-link');
+          
+          signInLinks.forEach(link => {
+            if (link.textContent && link.textContent.toLowerCase().includes('sign in')) {
+              // Remove existing listeners to avoid duplicates
+              link.removeEventListener('click', handleSignInClick);
+              // Add the navigation handler
+              link.addEventListener('click', handleSignInClick);
+              console.log('✅ Attached sign-in handler to:', link.textContent.trim());
+            }
+          });
+        }
+        
+        // Try multiple times to catch different loading states
+        attachSignInHandlers();
+        setTimeout(attachSignInHandlers, 100);
+        setTimeout(attachSignInHandlers, 500);
+        setTimeout(attachSignInHandlers, 1000);
+        setTimeout(attachSignInHandlers, 2000);
+      }
+      
+      // Enhanced fallback application
+      function showFallbackApp(apiWorking) {
+        const root = document.getElementById('root');
+        root.innerHTML = `
+          <div class="max-w-4xl mx-auto py-8 px-4">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 sticky top-0 z-40 -mx-4 px-4 mb-8">
+              <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl font-bold text-gray-900">🌐 CloudflareFlow</h1>
+                <button class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                  Help
+                </button>
+              </div>
+              
+              <!-- Progress Bar -->
+              <div class="pb-4">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-gray-900">Step 1 of 5</span>
+                  <span class="text-sm text-gray-600">0% Complete</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-blue-600 h-2 rounded-full w-0 transition-all duration-300"></div>
+                </div>
+                <div class="mt-2 text-center">
+                  <span class="text-lg font-semibold text-gray-900">Account Creation</span>
+                </div>
+              </div>
+            </header>
+            
+            <!-- Main Content -->
+            <div class="max-w-2xl mx-auto">
+              <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-4">Welcome to CloudflareFlow</h1>
+                <p class="text-lg text-gray-600">Create your account to get started with our onboarding process</p>
+              </div>
+              
+              <!-- API Status -->
+              <div class="mb-6 p-4 rounded-lg ${apiWorking ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
+                <div class="flex items-center">
+                  <span class="text-sm font-medium ${apiWorking ? 'text-green-800' : 'text-red-800'}">
+                    🔗 API Status: ${apiWorking ? 'Connected' : 'Disconnected'}
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Form -->
+              <div class="bg-white rounded-lg shadow-md p-6 lg:p-8 mb-8">
+                <form id="onboarding-form">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        First Name <span class="text-red-500">*</span>
+                      </label>
+                      <input type="text" id="firstName" class="input-field" placeholder="Enter your first name" required>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Last Name <span class="text-red-500">*</span>
+                      </label>
+                      <input type="text" id="lastName" class="input-field" placeholder="Enter your last name" required>
+                    </div>
+                  </div>
+                  
+                  <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" id="email" class="input-field" placeholder="Enter your email address" required>
+                  </div>
+                  
+                  <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Company (Optional)
+                    </label>
+                    <input type="text" id="company" class="input-field" placeholder="Enter your company name">
+                  </div>
+                  
+                  <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Password <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password" id="password" class="input-field" placeholder="Create a strong password" required>
+                  </div>
+                  
+                  <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm Password <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password" id="confirmPassword" class="input-field" placeholder="Confirm your password" required>
+                  </div>
+                  
+                  <div class="flex items-start mb-6">
+                    <div class="flex items-center h-5">
+                      <input id="terms" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" required>
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <label for="terms" class="text-gray-700">
+                        I agree to the <a href="#" class="text-blue-600 hover:text-blue-500 underline">Terms of Service</a> 
+                        and <a href="#" class="text-blue-600 hover:text-blue-500 underline">Privacy Policy</a>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div id="form-message"></div>
+                  
+                  <div class="flex items-center justify-between">
+                    <div></div>
+                    <button type="submit" id="continue-btn" class="btn-primary" disabled>
+                      Continue →
+                    </button>
+                  </div>
+                  
+                  <div class="text-center mt-6">
+                    <button type="button" class="text-sm text-gray-500 hover:text-gray-700 underline">
+                      Save and continue later
+                    </button>
+                  </div>
+                </form>
+              </div>
+              
+              <div class="text-center text-sm text-gray-600">
+                Already have an account? <a href="/signin" id="signin-link" class="text-blue-600 hover:text-blue-500 underline font-medium">Sign in</a>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Re-setup sign-in handling for the new content
+        setupSignInHandling();
+      }
+      
+      // Main initialization
+      window.addEventListener('load', async function() {
+        console.log('📱 Page loaded');
+        
+        // Test API connectivity
+        const apiWorking = await testAPI();
+        console.log('🔗 API working:', apiWorking);
+        
+        // Setup sign-in handling immediately for any existing content
+        setupSignInHandling();
+        
+        // Wait for React app to load
+        setTimeout(function() {
+          const root = document.getElementById('root');
+          const hasReactContent = root && root.children.length > 1;
+          
+          if (!hasReactContent) {
+            console.log('⚠️ React app not loaded, showing enhanced fallback');
+            showFallbackApp(apiWorking);
+          } else {
+            console.log('✅ React app loaded successfully');
+            // Still setup sign-in handling for React content
+            setupSignInHandling();
+          }
+        }, 2000);
+      });
+    </script>
   </body>
 </html>

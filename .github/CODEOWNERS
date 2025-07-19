@@ -1,0 +1,24 @@
+# Global code owners
+* @majid-omeir
+
+# Frontend React components and pages
+/packages/pages/ @majid-omeir
+
+# Cloudflare Worker API and backend logic
+/packages/worker/ @majid-omeir
+
+# Documentation and project planning
+/CLAUDE.md @majid-omeir
+/PLANNING.md @majid-omeir
+/TASKS.md @majid-omeir
+/README.md @majid-omeir
+
+# CI/CD and configuration
+/.github/ @majid-omeir
+/packages/pages/package.json @majid-omeir
+/packages/worker/package.json @majid-omeir
+/packages/worker/wrangler.toml @majid-omeir
+
+# Security and environment files
+/.env* @majid-omeir
+/packages/*/.env* @majid-omeir
