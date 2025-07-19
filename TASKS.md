@@ -5,8 +5,8 @@ Milestone: Week 0 – PRD Sign‑Off
 * ✅ Review the PRD with stakeholders and collect final feedback
 * ✅ Lock scope, success metrics, and open questions
 * ✅ Create GitHub repository and initialize README
-* Configure default branch protection rules and CODEOWNERS
-* Set up baseline CI workflow (lint + test placeholders)
+* ✅ Configure default branch protection rules and CODEOWNERS
+* ✅ Set up baseline CI workflow (lint + test placeholders)
 
 Milestone:  1‑2 – UX / UI Wireframes
 
