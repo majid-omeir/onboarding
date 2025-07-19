@@ -12,8 +12,14 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Sign In (without layout) */}
+        {/* Sign In (without layout) - MUST be before other routes */}
         <Route path="/signin" element={<SignIn />} />
+        
+        {/* Feedback Modal (without layout) */}
+        <Route path="/feedback" element={<Feedback />} />
+        
+        {/* Welcome Page (without layout) */}
+        <Route path="/welcome" element={<Welcome />} />
         
         {/* Onboarding Flow with Layout */}
         <Route path="/" element={<Layout />}>
@@ -24,13 +30,7 @@ function App() {
           <Route path="signature" element={<Signature />} />
         </Route>
         
-        {/* Feedback Modal (without layout) */}
-        <Route path="/feedback" element={<Feedback />} />
-        
-        {/* Welcome Page (without layout) */}
-        <Route path="/welcome" element={<Welcome />} />
-        
-        {/* Fallback */}
+        {/* Fallback - MUST be last */}
         <Route path="*" element={<Navigate to="/account" replace />} />
       </Routes>
     </Router>
